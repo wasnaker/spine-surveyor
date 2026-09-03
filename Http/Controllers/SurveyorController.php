@@ -16,8 +16,10 @@ use Spine\Services\ActivityLogService;
  * CRUD Surveyor — modul Surveyor.
  *
  * Field business:
- *   - code          (unique kode internal)
- *   - name, email, phone
+ *   - type          ('surveyor' untuk HO, 'branch' untuk cabang)
+ *   - parent        (FK ke surveyors.id, hanya diisi kalau type='branch')
+ *   - code          (unique per parent — code boleh duplikat kalau parent beda)
+ *   - name, email, phone, address
  *   - npwp          (string dari form; auto-create Vat row, simpan vat_id FK)
  *   - is_active     (boolean)
  *
@@ -34,7 +36,7 @@ class SurveyorController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $query = Surveyor::with('vat');
+        $query = Surveyor::with([ 'vat', 'parent:id,code,name', 'admin:id,name', 'province:id,name', 'regency:id,name']);
 
         if ($request->filled('q')) {
             $term = $request->string('q');
@@ -47,20 +49,59 @@ class SurveyorController extends Controller
         if ($request->has('is_active')) {
             $query->where('is_active', filter_var($request->query('is_active'), FILTER_VALIDATE_BOOLEAN));
         }
+        if ($request->has('type')) {
+            $type = $request->query('type');
+            if ($type === 'surveyor') {
+                $query->where('type', 'surveyor');
+            } elseif ($type === 'branch') {
+                $query->where('type', 'branch');
+            }
+        }
 
-        return response()->json(['data' => $query->orderByDesc('id')->get()]);
+        // Order: HO first, then branches, by id desc
+        $query->orderByRaw("CASE WHEN type = 'surveyor' THEN 0 ELSE 1 END")
+              ->orderByDesc('id');
+
+        return response()->json(['data' => $query->get()]);
     }
 
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'code'      => ['required', 'string', 'max:64', 'unique:surveyors,code'],
+            'type'      => ['sometimes', 'string', 'in:surveyor,branch'],
+            'code'      => ['required', 'string', 'max:64'],
             'name'      => ['required', 'string', 'max:190'],
             'email'     => ['nullable', 'string', 'email', 'max:190'],
             'phone'     => ['nullable', 'string', 'max:32'],
+            'address'   => ['nullable', 'string'],
             'npwp'      => ['nullable', 'string', 'max:32'],
             'is_active' => ['sometimes', 'boolean'],
+            'parent_id'    => ['nullable', 'integer'],
         ]);
+
+        $type = $validated['type'] ?? 'surveyor';
+        $parent = $validated['parent_id'] ?? null;
+
+        if (! in_array($type, ['surveyor', 'branch'])) {
+            $type = 'surveyor';
+        }
+
+        if ($type === 'branch' && ! $parent) {
+            return response()->json(['message' => 'Branch harus memiliki parent.'], 422);
+        }
+
+        if ($type === 'surveyor' && $parent) {
+            return response()->json(['message' => 'Surveyor HO tidak boleh memiliki parent.'], 422);
+        }
+
+        $code = $validated['code'];
+        $check = Surveyor::where('parent_id', $parent)
+            ->where('code', $code)
+            ->where('deleted_at', null)
+            ->first();
+        if ($check) {
+            return response()->json(['message' => "Code {$code} sudah ada untuk parent ini."], 422);
+        }
 
         $vatId = null;
         if (! empty($validated['npwp'])) {
@@ -68,16 +109,20 @@ class SurveyorController extends Controller
         }
         unset($validated['npwp']);
 
-        $entity = Surveyor::create($validated + ['vat_id' => $vatId]);
+        $entity = Surveyor::create(array_merge($validated, [
+            'vat_id'  => $vatId,
+            'type'    => $type,
+            'parent_id'  => $parent,
+        ]));
 
-        Log::info("[Surveyor] created", ['id' => $entity->id, 'code' => $entity->code]);
+        Log::info("[Surveyor] created", ['id' => $entity->id, 'code' => $entity->code, 'type' => $type]);
 
         return response()->json($entity, 201);
     }
 
     public function show(int $id): JsonResponse
     {
-        $entity = Surveyor::with(['branches.vat', 'vat'])->find($id);
+        $entity = Surveyor::with(['branches.vat', 'branches.parent:id,code,name', 'branches.admin:id,name', 'branches.province:id,name', 'branches.regency:id,name',  'vat', 'parent:id,code,name', 'admin:id,name', 'province:id,name', 'regency:id,name'])->find($id);
 
         if (! $entity) {
             return response()->json(['message' => 'Surveyor not found'], 404);
@@ -95,13 +140,36 @@ class SurveyorController extends Controller
         }
 
         $validated = $request->validate([
-            'code'      => ['sometimes', 'string', 'max:64', 'unique:surveyors,code,' . $id],
+            'type'      => ['sometimes', 'string', 'in:surveyor,branch'],
+            'code'      => ['sometimes', 'string', 'max:64'],
             'name'      => ['sometimes', 'string', 'max:190'],
             'email'     => ['nullable', 'string', 'email', 'max:190'],
             'phone'     => ['nullable', 'string', 'max:32'],
+            'address'   => ['nullable', 'string'],
             'npwp'      => ['nullable', 'string', 'max:32'],
             'is_active' => ['sometimes', 'boolean'],
+            'parent_id'    => ['nullable', 'integer'],
         ]);
+
+        if (array_key_exists('type', $validated) && $validated['type'] !== $entity->type) {
+            return response()->json(['message' => 'Tidak boleh mengubah type setelah row dibuat.'], 422);
+        }
+
+        if (array_key_exists('parent_id', $validated) && $validated['parent_id'] !== $entity->parent_id) {
+            return response()->json(['message' => 'Tidak boleh mengubah parent setelah row dibuat.'], 422);
+        }
+
+        if (array_key_exists('code', $validated)) {
+            $newCode = $validated['code'];
+            $dup = Surveyor::where('id', '!=', $entity->id)
+                ->where('parent_id', $entity->parent_id)
+                ->where('code', $newCode)
+                ->where('deleted_at', null)
+                ->first();
+            if ($dup) {
+                return response()->json(['message' => "Code {$newCode} sudah ada untuk parent ini."], 422);
+            }
+        }
 
         if (array_key_exists('npwp', $validated)) {
             if (! empty($validated['npwp'])) {
@@ -114,7 +182,7 @@ class SurveyorController extends Controller
 
         $entity->update($validated);
 
-        Log::info("[Surveyor] updated", ['id' => $entity->id, 'code' => $entity->code]);
+        Log::info("[Surveyor] updated", ['id' => $entity->id, 'code' => $entity->code, 'type' => $entity->type]);
 
         return response()->json($entity);
     }
@@ -130,6 +198,17 @@ class SurveyorController extends Controller
         $entity->delete();
 
         return response()->json(['message' => 'Surveyor deleted']);
+    }
+
+    public function branches(int $id): JsonResponse
+    {
+        $parent = Surveyor::find($id);
+
+        if (! $parent) {
+            return response()->json(['message' => 'Surveyor not found'], 404);
+        }
+
+        return response()->json(['data' => $parent->branches()->with(['vat', 'admin:id,name', 'province:id,name', 'regency:id,name'])->get()]);
     }
 
     public function activityLogs(int $id): JsonResponse
@@ -153,22 +232,5 @@ class SurveyorController extends Controller
             ]);
 
         return response()->json(['data' => $logs]);
-    }
-
-    /**
-     * Branches milik surveyor ini (nested resource).
-     */
-    public function branches(int $id, Request $request): JsonResponse
-    {
-        if (! Surveyor::find($id)) {
-            return response()->json(['message' => 'Surveyor not found'], 404);
-        }
-
-        $query = \Modules\Surveyor\Models\Branch::query()->where('surveyor_id', $id);
-        if ($request->has('is_active')) {
-            $query->where('is_active', filter_var($request->query('is_active'), FILTER_VALIDATE_BOOLEAN));
-        }
-
-        return response()->json(['data' => $query->orderByDesc('id')->get()]);
     }
 }
