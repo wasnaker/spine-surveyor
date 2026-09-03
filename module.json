@@ -1,0 +1,12 @@
+{
+    "name": "Customer",
+    "alias": "customer",
+    "description": "Module Customer for laravelspine — Customer + Branch (uses spine-vat for NPWP).",
+    "keywords": ["spine", "customer", "branch"],
+    "priority": 0,
+    "providers": [
+        "Modules\\Customer\\Providers\\CustomerServiceProvider"
+    ],
+    "files": [],
+    "requires": ["Vat"]
+}

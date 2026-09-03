@@ -1,0 +1,23 @@
+{
+    "name": "wasnaker/spine-customer",
+    "description": "Module Customer for laravelspine — Customer + Branch (NPWP via spine-vat).",
+    "license": "MIT",
+    "type": "laravel-module",
+    "require": {
+        "php": "^8.3",
+        "nwidart/laravel-modules": "^12.0",
+        "wasnaker/spine-vat": "dev-main"
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Customer\\": ""
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Customer\\Providers\\CustomerServiceProvider"
+            ]
+        }
+    }
+}
