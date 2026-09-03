@@ -74,9 +74,11 @@ class SurveyorController extends Controller
             'email'     => ['nullable', 'string', 'email', 'max:190'],
             'phone'     => ['nullable', 'string', 'max:32'],
             'address'   => ['nullable', 'string'],
+            'province_id' => ['nullable', 'integer', 'exists:provinces,id'],
+            'regency_id'  => ['nullable', 'integer', 'exists:regencies,id'],
             'npwp'      => ['nullable', 'string', 'max:32'],
             'is_active' => ['sometimes', 'boolean'],
-            'parent_id'    => ['nullable', 'integer'],
+            'parent_id' => ['nullable', 'integer'],
         ]);
 
         $type = $validated['type'] ?? 'surveyor';
@@ -146,6 +148,8 @@ class SurveyorController extends Controller
             'email'     => ['nullable', 'string', 'email', 'max:190'],
             'phone'     => ['nullable', 'string', 'max:32'],
             'address'   => ['nullable', 'string'],
+            'province_id' => ['nullable', 'integer', 'exists:provinces,id'],
+            'regency_id'  => ['nullable', 'integer', 'exists:regencies,id'],
             'npwp'      => ['nullable', 'string', 'max:32'],
             'is_active' => ['sometimes', 'boolean'],
             'parent_id'    => ['nullable', 'integer'],
