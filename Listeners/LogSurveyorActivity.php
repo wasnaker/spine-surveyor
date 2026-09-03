@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Modules\Customer\Listeners;
+namespace Modules\Surveyor\Listeners;
 
-use Modules\Customer\Models\Customer;
+use Modules\Surveyor\Models\Surveyor;
 use Spine\Events\EntityCreated;
 use Spine\Events\EntityDeleted;
 use Spine\Events\EntityUpdated;
 use Spine\Services\ActivityLogService;
 
 /**
- * HOOK — entity lifecycle generic (HasLifecycleHooks) untuk Customer.
+ * HOOK — entity lifecycle generic (HasLifecycleHooks) untuk Surveyor.
  *
  * 1. created/updated/deleted -> activity log (satu listener, semua entity).
  * 2. STATUS-CHANGE pattern (task_status_changed): EntityUpdated mengecek
  *    changes['status'] — padanan estimate_accepted di legacy.
  */
-class LogCustomerActivity
+class LogSurveyorActivity
 {
     public function __construct(private readonly ActivityLogService $activityLog)
     {
@@ -25,12 +25,12 @@ class LogCustomerActivity
 
     public function created(EntityCreated $event): void
     {
-        if (! $event->entity instanceof Customer) {
+        if (! $event->entity instanceof Surveyor) {
             return;
         }
 
         $this->activityLog->log(
-            "Customer created: " . $this->label($event->entity),
+            "Surveyor created: " . $this->label($event->entity),
             $event->entity,
             $this->user(),
             ['event' => 'created'],
@@ -39,12 +39,12 @@ class LogCustomerActivity
 
     public function updated(EntityUpdated $event): void
     {
-        if (! $event->entity instanceof Customer) {
+        if (! $event->entity instanceof Surveyor) {
             return;
         }
 
         $this->activityLog->log(
-            "Customer updated: " . $this->label($event->entity),
+            "Surveyor updated: " . $this->label($event->entity),
             $event->entity,
             $this->user(),
             ['event' => 'updated', 'changes' => $event->changes],
@@ -53,22 +53,22 @@ class LogCustomerActivity
         $status = $event->changes['status'] ?? null;
         if ($status && $status['old'] !== $status['new']) {
             $this->activityLog->log(
-                "Customer status changed: {$status['old']} -> {$status['new']}",
+                "Surveyor status changed: {$status['old']} -> {$status['new']}",
                 $event->entity,
                 $this->user(),
-                ['event' => 'customer.status_changed', 'old' => $status['old'], 'new' => $status['new']],
+                ['event' => 'surveyor.status_changed', 'old' => $status['old'], 'new' => $status['new']],
             );
         }
     }
 
     public function deleted(EntityDeleted $event): void
     {
-        if (! $event->entity instanceof Customer) {
+        if (! $event->entity instanceof Surveyor) {
             return;
         }
 
         $this->activityLog->log(
-            "Customer deleted: " . $this->label($event->entity),
+            "Surveyor deleted: " . $this->label($event->entity),
             null,
             $this->user(),
             ['event' => 'deleted', 'id' => $event->entity->getKey()],

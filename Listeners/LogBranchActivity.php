@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Modules\Customer\Listeners;
+namespace Modules\Surveyor\Listeners;
 
-use Modules\Customer\Models\Branch;
+use Modules\Surveyor\Models\Branch;
 use Spine\Events\EntityCreated;
 use Spine\Events\EntityDeleted;
 use Spine\Events\EntityUpdated;

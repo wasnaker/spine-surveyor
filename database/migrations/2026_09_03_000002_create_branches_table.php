@@ -7,11 +7,11 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Tabel branches — kantor cabang / site / pabrik milik Customer.
+ * Tabel branches — kantor cabang / site / pabrik milik Surveyor.
  *
  * vat_id nullable FK ke vats.id (NPWP cabang). Boleh null karena
  * cabang bisa tanpa NPWP sendiri, atau berbagi NPWP HO yang tercatat
- * di customers.parent_vat_number.
+ * di surveyors.parent_vat_number.
  */
 return new class extends Migration
 {
@@ -20,7 +20,7 @@ return new class extends Migration
         Schema::create('branches', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('ulid', 26)->nullable()->unique();
-            $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
+            $table->foreignId('surveyor_id')->constrained('surveyors')->cascadeOnDelete();
             $table->string('code', 64)->nullable();
             $table->string('name');
             $table->string('address')->nullable();

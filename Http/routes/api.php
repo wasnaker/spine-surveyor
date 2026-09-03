@@ -3,23 +3,23 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
-use Modules\Customer\Http\Controllers\BranchController;
-use Modules\Customer\Http\Controllers\CustomerController;
+use Modules\Surveyor\Http\Controllers\BranchController;
+use Modules\Surveyor\Http\Controllers\SurveyorController;
 
 /*
 |--------------------------------------------------------------------------
-| ROUTE MODUL Customer (konvensi core: api/v1 + auth:sanctum)
+| ROUTE MODUL Surveyor (konvensi core: api/v1 + auth:sanctum)
 |--------------------------------------------------------------------------
 | Middleware permission:feature:capability (gate per aksi).
 | Modul ini tidak expose endpoint Vat — lihat spine-vat untuk itu.
 |
-|   /api/v1/customers
-|     GET    /                              customer:view
-|     POST   /                              customer:create
-|     GET    /{id}                          customer:view
-|     PUT    /{id}                          customer:edit
-|     DELETE /{id}                          customer:delete
-|     GET    /{id}/activity-logs            customer:view
+|   /api/v1/surveyors
+|     GET    /                              surveyor:view
+|     POST   /                              surveyor:create
+|     GET    /{id}                          surveyor:view
+|     PUT    /{id}                          surveyor:edit
+|     DELETE /{id}                          surveyor:delete
+|     GET    /{id}/activity-logs            surveyor:view
 |     GET    /{id}/branches                 branch:view    (nested)
 |
 |   /api/v1/branches
@@ -32,14 +32,14 @@ use Modules\Customer\Http\Controllers\CustomerController;
 */
 
 Route::prefix('api/v1')->middleware('auth:sanctum')->group(function () {
-    Route::prefix('customers')->group(function () {
-        Route::get('/', [CustomerController::class, 'index'])->middleware('permission:customer:view');
-        Route::post('/', [CustomerController::class, 'store'])->middleware('permission:customer:create');
-        Route::get('/{id}', [CustomerController::class, 'show'])->whereNumber('id')->middleware('permission:customer:view');
-        Route::put('/{id}', [CustomerController::class, 'update'])->whereNumber('id')->middleware('permission:customer:edit');
-        Route::get('/{id}/activity-logs', [CustomerController::class, 'activityLogs'])->whereNumber('id')->middleware('permission:customer:view');
-        Route::get('/{id}/branches', [CustomerController::class, 'branches'])->whereNumber('id')->middleware('permission:branch:view');
-        Route::delete('/{id}', [CustomerController::class, 'destroy'])->whereNumber('id')->middleware('permission:customer:delete');
+    Route::prefix('surveyors')->group(function () {
+        Route::get('/', [SurveyorController::class, 'index'])->middleware('permission:surveyor:view');
+        Route::post('/', [SurveyorController::class, 'store'])->middleware('permission:surveyor:create');
+        Route::get('/{id}', [SurveyorController::class, 'show'])->whereNumber('id')->middleware('permission:surveyor:view');
+        Route::put('/{id}', [SurveyorController::class, 'update'])->whereNumber('id')->middleware('permission:surveyor:edit');
+        Route::get('/{id}/activity-logs', [SurveyorController::class, 'activityLogs'])->whereNumber('id')->middleware('permission:surveyor:view');
+        Route::get('/{id}/branches', [SurveyorController::class, 'branches'])->whereNumber('id')->middleware('permission:branch:view');
+        Route::delete('/{id}', [SurveyorController::class, 'destroy'])->whereNumber('id')->middleware('permission:surveyor:delete');
     });
 
     Route::prefix('branches')->group(function () {

@@ -1,6 +1,6 @@
 {
-    "name": "wasnaker/spine-customer",
-    "description": "Module Customer for laravelspine — Customer + Branch (NPWP via spine-vat).",
+    "name": "wasnaker/spine-surveyor",
+    "description": "Spine Surveyor module",
     "license": "MIT",
     "type": "laravel-module",
     "require": {
@@ -10,13 +10,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Modules\\Customer\\": ""
+            "Modules\\Surveyor\\": ""
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Modules\\Customer\\Providers\\CustomerServiceProvider"
+                "Modules\\Surveyor\\Providers\\SurveyorServiceProvider"
             ]
         }
     }

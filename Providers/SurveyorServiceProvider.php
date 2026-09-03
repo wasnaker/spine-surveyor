@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Modules\Customer\Providers;
+namespace Modules\Surveyor\Providers;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use Modules\Customer\Listeners\LogBranchActivity;
-use Modules\Customer\Listeners\LogCustomerActivity;
+use Modules\Surveyor\Listeners\LogBranchActivity;
+use Modules\Surveyor\Listeners\LogSurveyorActivity;
 
-class CustomerServiceProvider extends ServiceProvider
+class SurveyorServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
@@ -23,9 +23,9 @@ class CustomerServiceProvider extends ServiceProvider
 
         // HOOK — entity lifecycle (HasLifecycleHooks) untuk 2 entity modul.
         // Vat hook di-handle oleh spine-vat (module terpisah).
-        Event::listen(\Spine\Events\EntityCreated::class, LogCustomerActivity::class . '@created');
-        Event::listen(\Spine\Events\EntityUpdated::class, LogCustomerActivity::class . '@updated');
-        Event::listen(\Spine\Events\EntityDeleted::class, LogCustomerActivity::class . '@deleted');
+        Event::listen(\Spine\Events\EntityCreated::class, LogSurveyorActivity::class . '@created');
+        Event::listen(\Spine\Events\EntityUpdated::class, LogSurveyorActivity::class . '@updated');
+        Event::listen(\Spine\Events\EntityDeleted::class, LogSurveyorActivity::class . '@deleted');
 
         Event::listen(\Spine\Events\EntityCreated::class, LogBranchActivity::class . '@created');
         Event::listen(\Spine\Events\EntityUpdated::class, LogBranchActivity::class . '@updated');

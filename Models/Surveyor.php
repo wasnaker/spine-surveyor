@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Customer\Models;
+namespace Modules\Surveyor\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -13,19 +13,19 @@ use Modules\Vat\Models\Vat;
 use Spine\Traits\HasLifecycleHooks;
 
 /**
- * Customer — entity utama modul Customer.
+ * Surveyor — entity utama modul Surveyor.
  *
  * - branches: kantor cabang / site / pabrik (hasMany).
  * - vat:     NPWP HO (belongsTo vats, nullable). 1 NPWP = 1 row global;
- *            banyak customer bisa share row Vat yang sama via FK id.
+ *            banyak surveyor bisa share row Vat yang sama via FK id.
  */
-class Customer extends Model
+class Surveyor extends Model
 {
     use HasLifecycleHooks;
     use HasUlids;
     use SoftDeletes;
 
-    protected $table = 'customers';
+    protected $table = 'surveyors';
 
     protected $fillable = [
         'code', 'name', 'email', 'phone',

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Modules\Customer\Http\Controllers;
+namespace Modules\Surveyor\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
-use Modules\Customer\Models\Branch;
+use Modules\Surveyor\Models\Branch;
 use Modules\Vat\Services\VatService;
 use Spine\Services\ActivityLogService;
 
@@ -16,7 +16,7 @@ use Spine\Services\ActivityLogService;
  * CRUD Branch — kantor cabang / site / pabrik.
  *
  * Field:
- *   - customer_id  FK ke customers
+ *   - surveyor_id  FK ke surveyors
  *   - code         (nullable)
  *   - name, address, phone
  *   - npwp         (string dari form; auto-create Vat row, simpan vat_id)
@@ -34,8 +34,8 @@ class BranchController extends Controller
     {
         $query = Branch::with('vat');
 
-        if ($request->has('customer_id')) {
-            $query->where('customer_id', (int) $request->query('customer_id'));
+        if ($request->has('surveyor_id')) {
+            $query->where('surveyor_id', (int) $request->query('surveyor_id'));
         }
         if ($request->has('is_active')) {
             $query->where('is_active', filter_var($request->query('is_active'), FILTER_VALIDATE_BOOLEAN));
@@ -47,7 +47,7 @@ class BranchController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'customer_id' => ['required', 'integer', 'exists:customers,id'],
+            'surveyor_id' => ['required', 'integer', 'exists:surveyors,id'],
             'code'        => ['nullable', 'string', 'max:64'],
             'name'        => ['required', 'string', 'max:190'],
             'address'     => ['nullable', 'string'],
@@ -64,14 +64,14 @@ class BranchController extends Controller
 
         $entity = Branch::create($validated + ['vat_id' => $vatId]);
 
-        Log::info("[Branch] created", ['id' => $entity->id, 'customer_id' => $entity->customer_id]);
+        Log::info("[Branch] created", ['id' => $entity->id, 'surveyor_id' => $entity->surveyor_id]);
 
         return response()->json($entity, 201);
     }
 
     public function show(int $id): JsonResponse
     {
-        $entity = Branch::with(['customer', 'vat'])->find($id);
+        $entity = Branch::with(['surveyor', 'vat'])->find($id);
 
         if (! $entity) {
             return response()->json(['message' => 'Branch not found'], 404);
@@ -89,7 +89,7 @@ class BranchController extends Controller
         }
 
         $validated = $request->validate([
-            'customer_id' => ['sometimes', 'integer', 'exists:customers,id'],
+            'surveyor_id' => ['sometimes', 'integer', 'exists:surveyors,id'],
             'code'        => ['nullable', 'string', 'max:64'],
             'name'        => ['sometimes', 'string', 'max:190'],
             'address'     => ['nullable', 'string'],
@@ -109,7 +109,7 @@ class BranchController extends Controller
 
         $entity->update($validated);
 
-        Log::info("[Branch] updated", ['id' => $entity->id, 'customer_id' => $entity->customer_id]);
+        Log::info("[Branch] updated", ['id' => $entity->id, 'surveyor_id' => $entity->surveyor_id]);
 
         return response()->json($entity);
     }

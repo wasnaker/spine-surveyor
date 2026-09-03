@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Modules\Customer\Models;
+namespace Modules\Surveyor\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -12,12 +12,12 @@ use Modules\Vat\Models\Vat;
 use Spine\Traits\HasLifecycleHooks;
 
 /**
- * Branch — kantor cabang / site / pabrik milik Customer.
+ * Branch — kantor cabang / site / pabrik milik Surveyor.
  *
- * - customer: parent (belongsTo).
+ * - surveyor: parent (belongsTo).
  * - vat:     NPWP cabang (belongsTo vats, nullable). Boleh null jika
  *            cabang tanpa NPWP sendiri atau NPWP-nya = HO (vat_id
- *            di parent customer).
+ *            di parent surveyor).
  */
 class Branch extends Model
 {
@@ -28,7 +28,7 @@ class Branch extends Model
     protected $table = 'branches';
 
     protected $fillable = [
-        'customer_id', 'code', 'name', 'address', 'phone',
+        'surveyor_id', 'code', 'name', 'address', 'phone',
         'vat_id', 'is_active',
     ];
 
@@ -41,9 +41,9 @@ class Branch extends Model
         return ['ulid'];
     }
 
-    public function customer(): BelongsTo
+    public function surveyor(): BelongsTo
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(Surveyor::class);
     }
 
     public function vat(): BelongsTo

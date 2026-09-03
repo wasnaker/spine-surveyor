@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Modules\Customer\Http\Controllers;
+namespace Modules\Surveyor\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
-use Modules\Customer\Models\Customer;
+use Modules\Surveyor\Models\Surveyor;
 use Modules\Vat\Services\VatService;
 use Spine\Services\ActivityLogService;
 
 /**
- * CRUD Customer — modul Customer.
+ * CRUD Surveyor — modul Surveyor.
  *
  * Field business:
  *   - code          (unique kode internal)
@@ -22,9 +22,9 @@ use Spine\Services\ActivityLogService;
  *   - is_active     (boolean)
  *
  * Activity log OTOMATIS via EntityCreated/Updated/Deleted (HasLifecycleHooks)
- * -> listener LogCustomerActivity di ServiceProvider.
+ * -> listener LogSurveyorActivity di ServiceProvider.
  */
-class CustomerController extends Controller
+class SurveyorController extends Controller
 {
     public function __construct(
         private readonly ActivityLogService $activityLog,
@@ -34,7 +34,7 @@ class CustomerController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $query = Customer::with('vat');
+        $query = Surveyor::with('vat');
 
         if ($request->filled('q')) {
             $term = $request->string('q');
@@ -54,7 +54,7 @@ class CustomerController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'code'      => ['required', 'string', 'max:64', 'unique:customers,code'],
+            'code'      => ['required', 'string', 'max:64', 'unique:surveyors,code'],
             'name'      => ['required', 'string', 'max:190'],
             'email'     => ['nullable', 'string', 'email', 'max:190'],
             'phone'     => ['nullable', 'string', 'max:32'],
@@ -68,19 +68,19 @@ class CustomerController extends Controller
         }
         unset($validated['npwp']);
 
-        $entity = Customer::create($validated + ['vat_id' => $vatId]);
+        $entity = Surveyor::create($validated + ['vat_id' => $vatId]);
 
-        Log::info("[Customer] created", ['id' => $entity->id, 'code' => $entity->code]);
+        Log::info("[Surveyor] created", ['id' => $entity->id, 'code' => $entity->code]);
 
         return response()->json($entity, 201);
     }
 
     public function show(int $id): JsonResponse
     {
-        $entity = Customer::with(['branches.vat', 'vat'])->find($id);
+        $entity = Surveyor::with(['branches.vat', 'vat'])->find($id);
 
         if (! $entity) {
-            return response()->json(['message' => 'Customer not found'], 404);
+            return response()->json(['message' => 'Surveyor not found'], 404);
         }
 
         return response()->json($entity);
@@ -88,14 +88,14 @@ class CustomerController extends Controller
 
     public function update(int $id, Request $request): JsonResponse
     {
-        $entity = Customer::find($id);
+        $entity = Surveyor::find($id);
 
         if (! $entity) {
-            return response()->json(['message' => 'Customer not found'], 404);
+            return response()->json(['message' => 'Surveyor not found'], 404);
         }
 
         $validated = $request->validate([
-            'code'      => ['sometimes', 'string', 'max:64', 'unique:customers,code,' . $id],
+            'code'      => ['sometimes', 'string', 'max:64', 'unique:surveyors,code,' . $id],
             'name'      => ['sometimes', 'string', 'max:190'],
             'email'     => ['nullable', 'string', 'email', 'max:190'],
             'phone'     => ['nullable', 'string', 'max:32'],
@@ -114,33 +114,33 @@ class CustomerController extends Controller
 
         $entity->update($validated);
 
-        Log::info("[Customer] updated", ['id' => $entity->id, 'code' => $entity->code]);
+        Log::info("[Surveyor] updated", ['id' => $entity->id, 'code' => $entity->code]);
 
         return response()->json($entity);
     }
 
     public function destroy(int $id): JsonResponse
     {
-        $entity = Customer::find($id);
+        $entity = Surveyor::find($id);
 
         if (! $entity) {
-            return response()->json(['message' => 'Customer not found'], 404);
+            return response()->json(['message' => 'Surveyor not found'], 404);
         }
 
         $entity->delete();
 
-        return response()->json(['message' => 'Customer deleted']);
+        return response()->json(['message' => 'Surveyor deleted']);
     }
 
     public function activityLogs(int $id): JsonResponse
     {
-        if (! Customer::find($id)) {
-            return response()->json(['message' => 'Customer not found'], 404);
+        if (! Surveyor::find($id)) {
+            return response()->json(['message' => 'Surveyor not found'], 404);
         }
 
         $logs = $this->activityLog
             ->query()
-            ->where('subject_type', Customer::class)
+            ->where('subject_type', Surveyor::class)
             ->where('subject_id', $id)
             ->orderByDesc('created_at')
             ->get()
@@ -156,15 +156,15 @@ class CustomerController extends Controller
     }
 
     /**
-     * Branches milik customer ini (nested resource).
+     * Branches milik surveyor ini (nested resource).
      */
     public function branches(int $id, Request $request): JsonResponse
     {
-        if (! Customer::find($id)) {
-            return response()->json(['message' => 'Customer not found'], 404);
+        if (! Surveyor::find($id)) {
+            return response()->json(['message' => 'Surveyor not found'], 404);
         }
 
-        $query = \Modules\Customer\Models\Branch::query()->where('customer_id', $id);
+        $query = \Modules\Surveyor\Models\Branch::query()->where('surveyor_id', $id);
         if ($request->has('is_active')) {
             $query->where('is_active', filter_var($request->query('is_active'), FILTER_VALIDATE_BOOLEAN));
         }

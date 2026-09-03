@@ -7,17 +7,17 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Tabel customers — entity utama modul Customer.
+ * Tabel surveyors — entity utama modul Surveyor.
  *
  * Lifecycle: is_active (boolean), soft deletes, ulid.
  * NPWP HO attach via vat_id FK ke vats.id (module spine-vat). Kalau
- * customer tanpa NPWP HO, vat_id = null. Branch NPWP pakai branches.vat_id.
+ * surveyor tanpa NPWP HO, vat_id = null. Branch NPWP pakai branches.vat_id.
  */
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('customers', function (Blueprint $table) {
+        Schema::create('surveyors', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('ulid', 26)->nullable()->unique();
             $table->string('code', 64)->unique();
@@ -34,6 +34,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('customers');
+        Schema::dropIfExists('surveyors');
     }
 };
