@@ -65,11 +65,13 @@ return [
         ],
         'roles' => [
             ['name' => 'surveyor',              'label' => 'Surveyor',
-             'permissions' => ['surveyor:view']],
+             'permissions' => ['surveyor:view', 'connection:view']],
             ['name' => 'surveyor-branch-admin', 'label' => 'Surveyor Branch Admin',
-             'permissions' => ['surveyor:view', 'branch:*']],
+             'permissions' => ['surveyor:view', 'branch:*',
+                'connection:view', 'connection:create', 'connection:approve', 'connection:cancel']],
             ['name' => 'surveyor-admin',        'label' => 'Surveyor Admin',
-             'permissions' => ['surveyor:*', 'branch:*']],
+             'permissions' => ['surveyor:*', 'branch:*',
+                'connection:view', 'connection:create', 'connection:approve', 'connection:cancel']],
         ],
         'grants' => [
             'staff' => ['surveyor:view', 'branch:view'],
