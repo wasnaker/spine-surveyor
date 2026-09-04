@@ -274,7 +274,20 @@ class SurveyorController extends Controller
             return response()->json(['message' => 'Surveyor not found'], 404);
         }
 
-        return response()->json(['data' => $parent->branches()->with(['vat', 'admin:id,name', 'province:id,name', 'regency:id,name'])->get()]);
+        $query = $parent->branches()->with(['vat', 'admin:id,name', 'province:id,name', 'regency:id,name']);
+
+        // Caller customer (view-connected): branch TIDAK otomatis terhubung —
+        // hanya tampilkan cabang yang punya connection ACTIVE dengannya.
+        if (! $this->isFullAccess($request)) {
+            $actor = $this->actors->resolve($request->user());
+            if ($actor['type'] !== 'customer') {
+                return response()->json(['message' => 'Forbidden.'], 403);
+            }
+            $ids = $this->connectedSurveyorIds($actor['entity']->id);
+            $query->whereIn('surveyors.id', $ids === [] ? [0] : $ids);
+        }
+
+        return response()->json(['data' => $query->get()]);
     }
 
     public function activityLogs(int $id, Request $request): JsonResponse
