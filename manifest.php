@@ -63,17 +63,21 @@ return [
         'permissions' => [
             'surveyor:view', 'surveyor:create', 'surveyor:edit', 'surveyor:delete',
             'surveyor:view-connected',
+            'customer:view-connected',
             'branch:view',   'branch:create',   'branch:edit',   'branch:delete',
         ],
         'roles' => [
             // Role BASE semua user entity surveyor: TANPA surveyor:view (menu
             // Surveyors di-block; data company via Profile /user/company).
+            // customer:view-connected = menu Customers utk rekan terhubung.
             ['name' => 'surveyor',              'label' => 'Surveyor',
-             'permissions' => ['connection:view']],
+             'permissions' => ['connection:view', 'customer:view-connected']],
             ['name' => 'surveyor-branch-admin', 'label' => 'Surveyor Branch Admin',
-             'permissions' => ['connection:view', 'connection:create', 'connection:approve', 'connection:cancel']],
+             'permissions' => ['connection:view', 'connection:create', 'connection:approve', 'connection:cancel',
+                'customer:view-connected']],
             ['name' => 'surveyor-admin',        'label' => 'Surveyor Admin',
-             'permissions' => ['connection:view', 'connection:create', 'connection:approve', 'connection:cancel']],
+             'permissions' => ['connection:view', 'connection:create', 'connection:approve', 'connection:cancel',
+                'customer:view-connected']],
         ],
         'grants' => [
             'staff' => ['surveyor:view', 'surveyor:view-connected', 'branch:view'],
