@@ -71,13 +71,13 @@ return [
             // Surveyors di-block; data company via Profile /user/company).
             // customer:view-connected = menu Customers utk rekan terhubung.
             ['name' => 'surveyor',              'label' => 'Surveyor',
-             'permissions' => ['connection:view', 'customer:view-connected']],
+             'permissions' => ['connection:view', 'customer:view-connected', 'agency:surveyor-register']],
             ['name' => 'surveyor-branch-admin', 'label' => 'Surveyor Branch Admin',
              'permissions' => ['connection:view', 'connection:create', 'connection:approve', 'connection:cancel',
-                'customer:view-connected']],
+                'customer:view-connected', 'agency:surveyor-register']],
             ['name' => 'surveyor-admin',        'label' => 'Surveyor Admin',
              'permissions' => ['connection:view', 'connection:create', 'connection:approve', 'connection:cancel',
-                'customer:view-connected']],
+                'customer:view-connected', 'agency:surveyor-register']],
         ],
         'grants' => [
             'staff' => ['surveyor:view', 'surveyor:view-connected', 'branch:view'],
