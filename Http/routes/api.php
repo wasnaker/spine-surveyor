@@ -23,11 +23,11 @@ use Modules\Surveyor\Http\Controllers\SurveyorController;
 
 Route::prefix('api/v1')->middleware('auth:sanctum')->group(function () {
     Route::prefix('surveyors')->group(function () {
-        Route::get('/', [SurveyorController::class, 'index'])->middleware('permission:surveyor:view');
+        Route::get('/', [SurveyorController::class, 'index'])->middleware('permission:surveyor:view|surveyor:view-connected');
         Route::post('/', [SurveyorController::class, 'store'])->middleware('permission:surveyor:create');
-        Route::get('/{id}', [SurveyorController::class, 'show'])->whereNumber('id')->middleware('permission:surveyor:view');
+        Route::get('/{id}', [SurveyorController::class, 'show'])->whereNumber('id')->middleware('permission:surveyor:view|surveyor:view-connected');
         Route::put('/{id}', [SurveyorController::class, 'update'])->whereNumber('id')->middleware('permission:surveyor:edit');
-        Route::get('/{id}/activity-logs', [SurveyorController::class, 'activityLogs'])->whereNumber('id')->middleware('permission:surveyor:view');
+        Route::get('/{id}/activity-logs', [SurveyorController::class, 'activityLogs'])->whereNumber('id')->middleware('permission:surveyor:view|surveyor:view-connected');
         Route::get('/{id}/branches', [SurveyorController::class, 'branches'])->whereNumber('id')->middleware('permission:branch:view');
         Route::delete('/{id}', [SurveyorController::class, 'destroy'])->whereNumber('id')->middleware('permission:surveyor:delete');
     });

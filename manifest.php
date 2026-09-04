@@ -18,7 +18,8 @@ return [
             'icon'       => '👥',
             'href'       => '/surveyors',
             'position'   => 30,
-            'permission' => 'surveyor:view',
+            // Platform (surveyor:view) ATAU customer dgn koneksi (view-connected).
+            'permission' => 'surveyor:view|surveyor:view-connected',
         ],
     ],
 
@@ -38,7 +39,7 @@ return [
             'icon'       => '👁️',
             'api'        => '/api/v1/surveyors/{id}',
             'position'   => 10,
-            'permission' => 'surveyor:view',
+            'permission' => 'surveyor:view|surveyor:view-connected',
         ],
         [
             'slug'       => 'branches',
@@ -54,27 +55,28 @@ return [
             'icon'       => '🕐',
             'api'        => '/api/v1/surveyors/{id}/activity-logs',
             'position'   => 30,
-            'permission' => 'surveyor:view',
+            'permission' => 'surveyor:view|surveyor:view-connected',
         ],
     ],
 
     'rbac' => [
         'permissions' => [
             'surveyor:view', 'surveyor:create', 'surveyor:edit', 'surveyor:delete',
+            'surveyor:view-connected',
             'branch:view',   'branch:create',   'branch:edit',   'branch:delete',
         ],
         'roles' => [
+            // Role BASE semua user entity surveyor: TANPA surveyor:view (menu
+            // Surveyors di-block; data company via Profile /user/company).
             ['name' => 'surveyor',              'label' => 'Surveyor',
-             'permissions' => ['surveyor:view', 'connection:view']],
+             'permissions' => ['connection:view']],
             ['name' => 'surveyor-branch-admin', 'label' => 'Surveyor Branch Admin',
-             'permissions' => ['surveyor:view', 'branch:*',
-                'connection:view', 'connection:create', 'connection:approve', 'connection:cancel']],
+             'permissions' => ['connection:view', 'connection:create', 'connection:approve', 'connection:cancel']],
             ['name' => 'surveyor-admin',        'label' => 'Surveyor Admin',
-             'permissions' => ['surveyor:*', 'branch:*',
-                'connection:view', 'connection:create', 'connection:approve', 'connection:cancel']],
+             'permissions' => ['connection:view', 'connection:create', 'connection:approve', 'connection:cancel']],
         ],
         'grants' => [
-            'staff' => ['surveyor:view', 'branch:view'],
+            'staff' => ['surveyor:view', 'surveyor:view-connected', 'branch:view'],
         ],
     ],
 ];
