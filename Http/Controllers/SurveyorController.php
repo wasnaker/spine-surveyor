@@ -43,7 +43,8 @@ class SurveyorController extends Controller
      */
     private function isFullAccess(Request $request): bool
     {
-        return $request->user()->hasPermissionTo('surveyor:view');
+        // can() via Gate — hormati Gate::before (role admin = super-admin).
+        return $request->user()->can('surveyor:view');
     }
 
     /**
