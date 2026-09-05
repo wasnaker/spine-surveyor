@@ -29,6 +29,7 @@ Route::prefix('api/v1')->middleware('auth:sanctum')->group(function () {
         Route::put('/{id}', [SurveyorController::class, 'update'])->whereNumber('id')->middleware('permission:surveyor:edit');
         Route::get('/{id}/activity-logs', [SurveyorController::class, 'activityLogs'])->whereNumber('id')->middleware('permission:surveyor:view|surveyor:view-connected');
         Route::get('/{id}/branches', [SurveyorController::class, 'branches'])->whereNumber('id')->middleware('permission:branch:view');
+        Route::get('/{id}/staffs', [SurveyorController::class, 'staffs'])->whereNumber('id')->middleware('permission:surveyor:view|surveyor:view-connected');
         Route::delete('/{id}', [SurveyorController::class, 'destroy'])->whereNumber('id')->middleware('permission:surveyor:delete');
     });
 });

@@ -50,6 +50,14 @@ return [
             'permission' => 'branch:view',
         ],
         [
+            'slug'       => 'staffs',
+            'label'      => 'Staff',
+            'icon'       => '👥',
+            'api'        => '/api/v1/surveyors/{id}/staffs',
+            'position'   => 26,
+            'permission' => 'surveyor:view|surveyor:view-connected',
+        ],
+        [
             'slug'       => 'activity',
             'label'      => 'Activity',
             'icon'       => '🕐',

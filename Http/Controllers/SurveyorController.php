@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Modules\Connection\Models\Connection;
 use Modules\Connection\Services\ActorResolver;
 use Modules\Surveyor\Models\Surveyor;
+use Modules\Surveyor\Models\SurveyorStaff;
 use Modules\Vat\Services\VatService;
 use Spine\Services\ActivityLogService;
 
@@ -287,6 +288,26 @@ class SurveyorController extends Controller
             $ids = $this->connectedSurveyorIds($actor['entity']->id);
             $query->whereIn('surveyors.id', $ids === [] ? [0] : $ids);
         }
+
+        return response()->json(['data' => $query->get()]);
+    }
+
+    /**
+     * Staff surveyor — pola Customer::staffs(). customer_id = surveyors.id
+     * (HO: staff HO+anak tersimpan ke HO; branch: staff branch tsb).
+     */
+    public function staffs(int $id): JsonResponse
+    {
+        $surveyor = Surveyor::find($id);
+
+        if (! $surveyor) {
+            return response()->json(['message' => 'Surveyor not found'], 404);
+        }
+
+        $query = SurveyorStaff::query()
+            ->with(['user:id,name,email'])
+            ->where('surveyor_id', $surveyor->id)
+            ->orderBy('jabatan')->orderBy('realname');
 
         return response()->json(['data' => $query->get()]);
     }
